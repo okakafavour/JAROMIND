@@ -5,8 +5,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/okakafavour/jaromind-backend/models"
+
+	// "github.com/okakafavour/jaromind-backend/services"
 	servicesimpl "github.com/okakafavour/jaromind-backend/services_impl"
 )
+
+// var userService services.UserService
 
 type RegisterRequest struct {
 	Name     string `json:"name" binding:"required"`
@@ -67,9 +71,11 @@ func LoginUser(c *gin.Context) {
 func GetProfile(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	email, _ := c.Get("email")
+	role, _ := c.Get("role")
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"user_id": userID,
 		"email":   email,
+		"role":    role,
 	})
 }

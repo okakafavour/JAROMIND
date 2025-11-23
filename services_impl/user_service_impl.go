@@ -78,22 +78,22 @@ func (s *userServiceImpl) Login(email, password string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	var student models.User
-	err := s.collection.FindOne(ctx, bson.M{"email": student.Email}).Decode(&student)
+	var user models.User
+	err := s.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return "", errors.New("invalid email or password")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(student.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return "", errors.New("invalid email or password")
 	}
 
-	if !student.Verified {
-		return "", errors.New("email is not verified")
-	}
+	// if !user.Verified {
+	// 	return "", errors.New("email is not verified")
+	// }
 
-	token, err := utils.GenerateJWT(student.ID.Hex(), student.Email)
+	token, err := utils.GenerateJWT(user.ID.Hex(), user.Email)
 	if err != nil {
 		return "", errors.New("failed to generate token")
 	}
