@@ -16,19 +16,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type studentServiceImpl struct {
+type userServiceImpl struct {
 	collection *mongo.Collection
 }
 
 // Constructor
-func NewStudentService() services.StudentService {
-	return &studentServiceImpl{
+func NewUserService() services.UserService {
+	return &userServiceImpl{
 		collection: config.GetCollection("students"),
 	}
 }
 
 // -------- REGISTER METHOD --------
-func (s *studentServiceImpl) Register(student models.User) error {
+func (s *userServiceImpl) Register(student models.User) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -42,7 +42,6 @@ func (s *studentServiceImpl) Register(student models.User) error {
 		return errors.New("user with this email already exists")
 	}
 
-	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(student.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -75,19 +74,19 @@ func (s *studentServiceImpl) Register(student models.User) error {
 	return nil
 }
 
-func (s *studentServiceImpl) Login(email, password string) (string, error) {
+func (s *userServiceImpl) Login(email, password string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	var student models.User
 	err := s.collection.FindOne(ctx, bson.M{"email": student.Email}).Decode(&student)
 	if err != nil {
-		return "", errors.New("Invalid email or password")
+		return "", errors.New("invalid email or password")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(student.Password), []byte(password))
 	if err != nil {
-		return "", errors.New("Invalid email or password")
+		return "", errors.New("invalid email or password")
 	}
 
 	if !student.Verified {

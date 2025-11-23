@@ -14,7 +14,7 @@ type RegisterRequest struct {
 	Password string `json:"password" binding:"required,min=6"`
 }
 
-func RegisterStudent(c *gin.Context) {
+func RegisterUser(c *gin.Context) {
 	var request RegisterRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -22,13 +22,13 @@ func RegisterStudent(c *gin.Context) {
 		return
 	}
 
-	student := models.Student{
+	student := models.User{
 		Name:     request.Name,
 		Email:    request.Email,
 		Password: request.Password,
 	}
 
-	err := servicesimpl.NewStudentService().Register(student)
+	err := servicesimpl.NewUserService().Register(student)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -44,7 +44,7 @@ type LoginRequest struct {
 	Password string `bson:"password" binding:"required"`
 }
 
-func LoginStudent(c *gin.Context) {
+func LoginUser(c *gin.Context) {
 	var request LoginRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -52,7 +52,7 @@ func LoginStudent(c *gin.Context) {
 		return
 	}
 
-	token, err := servicesimpl.NewStudentService().Login(request.Email, request.Password)
+	token, err := servicesimpl.NewUserService().Login(request.Email, request.Password)
 	if err != nil {
 		c.JSON(401, gin.H{"error": err.Error()})
 		return
@@ -61,5 +61,15 @@ func LoginStudent(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Login successfully",
 		"token":   token,
+	})
+}
+
+func GetProfile(c *gin.Context) {
+	userID, _ := c.Get("user_id")
+	email, _ := c.Get("email")
+
+	c.JSON(200, gin.H{
+		"user_id": userID,
+		"email":   email,
 	})
 }
