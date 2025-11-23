@@ -2,7 +2,7 @@ package services
 
 import "github.com/okakafavour/jaromind-backend/models"
 
-type StudentService interface {
-	Register(student models.Student) error
+type UserService interface {
+	Register(student models.User) error
 	Login(email, password string) (string, error)
 }

@@ -28,7 +28,7 @@ func NewStudentService() services.StudentService {
 }
 
 // -------- REGISTER METHOD --------
-func (s *studentServiceImpl) Register(student models.Student) error {
+func (s *studentServiceImpl) Register(student models.User) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -55,7 +55,7 @@ func (s *studentServiceImpl) Register(student models.Student) error {
 	}
 
 	// Create new student object
-	newStudent := models.Student{
+	newStudent := models.User{
 		ID:        primitive.NewObjectID(),
 		Name:      student.Name,
 		Email:     student.Email,
@@ -73,4 +73,32 @@ func (s *studentServiceImpl) Register(student models.Student) error {
 	}
 
 	return nil
+}
+
+func (s *studentServiceImpl) Login(email, password string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var student models.User
+	err := s.collection.FindOne(ctx, bson.M{"email": student.Email}).Decode(&student)
+	if err != nil {
+		return "", errors.New("Invalid email or password")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(student.Password), []byte(password))
+	if err != nil {
+		return "", errors.New("Invalid email or password")
+	}
+
+	if !student.Verified {
+		return "", errors.New("email is not verified")
+	}
+
+	token, err := utils.GenerateJWT(student.ID.Hex(), student.Email)
+	if err != nil {
+		return "", errors.New("failed to generate token")
+	}
+
+	return token, nil
+
 }
